@@ -39,7 +39,7 @@ class PanNukeSegmentation(Dataset):
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
         image = self.dataset[index]["image"]
         segmentation = self._create_segmentation(
-            self.dataset[index]["instances"], self.dataset["categories"]
+            self.dataset[index]["instances"], self.dataset[index]["categories"]
         )
         if self.transform: image = self.transform(image)
         if self.target_transform:
