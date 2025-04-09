@@ -21,6 +21,15 @@ class PanNukeSegmentation(Dataset):
         else:
             raise ValueError(f"split `{split}` is not supported")
         
+        self.categories = {
+            0: "background",
+            1: "neoplastic",
+            2: "inflammatory",
+            3: "connective",
+            4: "dead",
+            5: "epithelial"
+        }
+        
         self.transform = transform
         self.target_transform = target_transform
 
