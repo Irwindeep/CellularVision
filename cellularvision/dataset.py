@@ -40,7 +40,7 @@ class PanNukeSegmentation(Dataset):
         image: PngImageFile = self.dataset[index]["image"]
         segmentation = self._create_segmentation(
             self.dataset[index]["instances"], self.dataset[index]["categories"],
-            image.size[:-1]
+            image.size
         )
         if self.transform: image = self.transform(image)
         if self.target_transform:
