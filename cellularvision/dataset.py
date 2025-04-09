@@ -37,9 +37,10 @@ class PanNukeSegmentation(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
-        image = self.dataset[index]["image"]
+        image: PngImageFile = self.dataset[index]["image"]
         segmentation = self._create_segmentation(
-            self.dataset[index]["instances"], self.dataset[index]["categories"]
+            self.dataset[index]["instances"], self.dataset[index]["categories"],
+            image.size[:-1]
         )
         if self.transform: image = self.transform(image)
         if self.target_transform:
@@ -48,9 +49,10 @@ class PanNukeSegmentation(Dataset):
         return image, segmentation
     
     def _create_segmentation(
-        self, instances: List[PngImageFile], categories: List[int]
+        self, instances: List[PngImageFile], categories: List[int],
+        size: Tuple[int, ...]
     ) -> Image.Image:
-        segmentation_mask = np.zeros(instances[0].size, dtype=np.uint8)
+        segmentation_mask = np.zeros(size, dtype=np.uint8)
         for instance, category in zip(instances, categories):
             indices = (np.array(instance) == 1)
             segmentation_mask[indices] = category+1
