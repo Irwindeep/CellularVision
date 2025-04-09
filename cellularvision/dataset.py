@@ -16,7 +16,7 @@ class PanNukeSegmentation(Dataset):
         self.root = root
         dataset = load_dataset("RationAI/PanNuke", cache_dir=self.root)
         if split == "train":
-            self.dataset = concatenate_datasets(dataset["fold1"], dataset["fold2"])
+            self.dataset = concatenate_datasets([dataset["fold1"], dataset["fold2"]])
         elif split == "test": self.dataset = dataset["fold3"]
         else:
             raise ValueError(f"split `{split}` is not supported")
