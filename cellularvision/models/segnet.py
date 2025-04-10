@@ -1,39 +1,39 @@
 import torch
 import torch.nn as nn
 
+from torchvision import models # type: ignore
 from cellularvision.functional import Conv2dBlock
 from typing import Tuple, List
 
 class Encoder(nn.Module):
-    def __init__(self, num_classes: int) -> None:
+    def __init__(self, pretrained: bool = True) -> None:
         super(Encoder, self).__init__()
 
-        self.conv_params = [
-            (3, 32, 1), (32, 64, 1), (64, 128, 2),
-            (128, 256, 2)
-        ]
+        encoder = (
+            models.vgg11_bn(weights=models.VGG11_BN_Weights.IMAGENET1K_V1) if pretrained
+            else models.vgg11_bn()
+        ).features
+        encoder_list = list(encoder.children())
 
-        self.conv_blocks = nn.ModuleList([
-            nn.Sequential(
-                Conv2dBlock(
-                    in_channels=conv_param[0], out_channels=conv_param[1],
-                    kernel_size=3, num_blocks=conv_param[2]
-                ),
-                nn.BatchNorm2d(conv_param[1]),
-                nn.ReLU()
-            )
-            for conv_param in self.conv_params
-        ])
-        self.pool_layer = nn.MaxPool2d(2, 2, return_indices=True)
+        self.conv_blocks = nn.ModuleList()
+        self.pool_layers = nn.ModuleList()
+        self.encoder_channels = [3, 64, 128, 256, 512, 512]
 
-        self.conv_params[0] = (num_classes + 1, 32, 1)
+        conv_block = []
+        for module in encoder_list:
+            if isinstance(module, nn.MaxPool2d):
+                self.conv_blocks.append(nn.Sequential(*conv_block))
+                module.return_indices, conv_block = True, []
+                self.pool_layers.append(module)
+
+            else: conv_block.append(module)
 
     def forward(self, input: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         output, pool_indices = input, []
 
-        for conv_block in self.conv_blocks:
+        for conv_block, pool_layer in zip(self.conv_blocks, self.pool_layers):
             output = conv_block(output)
-            output, indices = self.pool_layer(output)
+            output, indices = pool_layer(output)
             pool_indices.append(indices)
 
         return output, pool_indices
@@ -43,15 +43,10 @@ class DecoderBlock(nn.Module):
         super(DecoderBlock, self).__init__()
 
         self.upsample = nn.MaxUnpool2d(2, 2)
-        self.decoder = nn.Sequential(*[
-            nn.Sequential(
-                nn.Conv2d(in_channels, out_chann, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(num_features=out_chann),
-                nn.ReLU()
-            )
-            for i in range(depth)
-            for out_chann in [in_channels if i != depth - 1 else out_channels]
-        ])
+        self.decoder = Conv2dBlock(
+            in_channels=in_channels, out_channels=out_channels,
+            kernel_size=3, num_blocks=depth
+        )
 
     def forward(self, input: torch.Tensor, pooling_indices: torch.Tensor) -> torch.Tensor:
         upsampled_input = self.upsample(input, pooling_indices)
@@ -59,15 +54,19 @@ class DecoderBlock(nn.Module):
         return output
     
 class SegNet(nn.Module):
-    def __init__(self, num_classes: int) -> None:
+    def __init__(
+        self, num_classes: int, decoder_depths: List[int],
+        pretrained: bool = True
+    ) -> None:
         super(SegNet, self).__init__()
 
-        self.encoder = Encoder(num_classes)
-        conv_params = self.encoder.conv_params
+        self.encoder = Encoder(pretrained)
+        in_channs = self.encoder.encoder_channels[::-1][:-1]
+        out_channs = self.encoder.encoder_channels[::-1][1:-1] + [num_classes + 1]
 
         self.decoder_blocks = nn.ModuleList([
-            DecoderBlock(conv_param[1], conv_param[0], conv_param[2])
-            for conv_param in conv_params[::-1]
+            DecoderBlock(in_chann, out_chann, depth)
+            for in_chann, out_chann, depth in zip(in_channs, out_channs ,decoder_depths)
         ])
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
