@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from torchvision import models
+from torchvision import models # type: ignore
 from typing import Tuple, List
 
 class Encoder(nn.Module):
@@ -22,7 +22,7 @@ class Encoder(nn.Module):
             (256, 512, 2), (512, 512, 2)
         ]
 
-        conv_block = []
+        conv_block: List[nn.Module] = []
         for i, module in enumerate(encoder_list):
             if isinstance(module, nn.MaxPool2d):
                 self.conv_blocks.append(nn.Sequential(*conv_block))
