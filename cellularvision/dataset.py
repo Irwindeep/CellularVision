@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from datasets import load_dataset, concatenate_datasets # type: ignore
 from PIL import Image
 
-from typing import Optional, Callable, List, Tuple, Any
+from typing import Optional, Callable, List, Tuple, Any, Dict
 from PIL.PngImagePlugin import PngImageFile
 
 class PanNukeSegmentation(Dataset):
@@ -32,6 +32,16 @@ class PanNukeSegmentation(Dataset):
         
         self.transform = transform
         self.target_transform = target_transform
+
+    def get_classwise_frequency(self) -> Dict[int, int]:
+        freq = {0: len(self.dataset)}
+        for i in range(1, 6): freq[i] = 0
+        for idx in range(len(self.dataset)):
+            categories = self.dataset[idx]["categories"]
+            for category in categories:
+                freq[category+1] += 1
+
+        return freq
 
     def __len__(self) -> int:
         return len(self.dataset)
