@@ -14,8 +14,7 @@ class DiceScore(nn.Module):
         seg_sum = seg_indices.float().sum()
         target_sum = target_indices.float().sum()
 
-        if (seg_sum + target_sum).item() == 0: return torch.tensor(float("nan"))
-        return 2*intersection/(seg_sum + target_sum)
+        return 2*intersection/(seg_sum + target_sum + 1e-8)
     
 class IoUScore(nn.Module):
     def __init__(self) -> None:
@@ -28,6 +27,4 @@ class IoUScore(nn.Module):
         intersection = (seg_indices & target_indices).float().sum()
         union = (seg_indices | target_indices).float().sum()
 
-        if union.item() == 0: return torch.tensor(float("nan"))
-
-        return intersection/union
+        return intersection/(union + 1e-8)
