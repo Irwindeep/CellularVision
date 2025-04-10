@@ -19,7 +19,7 @@ class Encoder(nn.Module):
         self.pool_layers = nn.ModuleList()
         self.encoder_channels = [3, 64, 128, 256, 512, 512]
 
-        conv_block = []
+        conv_block: List[nn.Module] = []
         for module in encoder_list:
             if isinstance(module, nn.MaxPool2d):
                 self.conv_blocks.append(nn.Sequential(*conv_block))
