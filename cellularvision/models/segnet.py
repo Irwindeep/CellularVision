@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-from torchvision import models # type: ignore
 from cellularvision.functional import Conv2dBlock
 from typing import Tuple, List
 
