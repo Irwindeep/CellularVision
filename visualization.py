@@ -19,10 +19,10 @@ train_dataset = PanNukeSegmentation(
     transform=transform, target_transform=transform
 )
 
-rows, cols = 4, 4
+rows, cols = 4, 6
 indices = np.random.randint(0, len(train_dataset), size=rows*cols)
 
-plt.figure(figsize=(12, 12))
+plt.figure(figsize=(12, 9))
 plt.suptitle(
     "Training Dataset",
     fontweight="bold", fontsize=20
