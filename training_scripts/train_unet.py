@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 
 from cellularvision.dataset import PanNukeSegmentation
-from cellularvision.models import SegNet
+from cellularvision.models import UNet
 from cellularvision.utils import val_epoch, train_epoch
 
 import matplotlib.pyplot as plt
@@ -45,16 +45,17 @@ def load_datasets() -> Tuple[PanNukeSegmentation, PanNukeSegmentation]:
 
     return train_dataset, val_dataset
 
-def load_model() -> SegNet:
-    model = SegNet(
+def load_model() -> UNet:
+    model = UNet(
         num_classes=5,
-        decoder_depths=[2, 2, 1, 1, 1]
+        encoder_channels=[3, 32, 64, 128, 256],
+        kernel_size=3
     ).to(device)
 
     return model
 
 def train_model(
-    model: SegNet, optim: torch.optim.Optimizer,
+    model: UNet, optim: torch.optim.Optimizer,
     loss_fn: nn.Module, batch_size: int, epochs: int
 ) -> Tuple[List[float], List[float]]:
     train_dataset, val_dataset = load_datasets()
@@ -75,12 +76,12 @@ def train_model(
 
         if val_loss < best_val_loss:
             best_val_loss, count = val_loss, 0
-            torch.save(model.state_dict(), "model_weights/segnet_weights.pth")
+            torch.save(model.state_dict(), "model_weights/unet_weights.pth")
         else: count += 1
 
         if count >= 5:
             print("Stopping early with best model state...")
-            model.load_state_dict(torch.load("model_weights/segnet_weights.pth"))
+            model.load_state_dict(torch.load("model_weights/unet_weights.pth"))
             break
 
     return train_losses, val_losses
@@ -104,7 +105,7 @@ def main() -> None:
     plt.title("Training and Validation Loss", fontweight="bold")
     plt.legend()
     plt.grid()
-    plt.savefig("figures/train_losses/segnet.png")
+    plt.savefig("figures/train_losses/unet.png")
 
 if __name__=="__main__":
     main()
