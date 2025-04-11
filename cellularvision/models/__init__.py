@@ -1,3 +1,4 @@
+from .cnn_autoencoder import SegmentationCNN
 from .segnet import (
     Encoder as SegNetEncoder,
     DecoderBlock as SegNetDecoderBlock,
@@ -10,6 +11,7 @@ from .unet import (
 )
 
 __all__ = [
+    "SegmentationCNN",
     "SegNetDecoderBlock",
     "SegNetEncoder",
     "SegNet",
