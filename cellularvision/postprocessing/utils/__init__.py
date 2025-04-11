@@ -1,3 +1,5 @@
+from .graph import graph_laplacian
+
 import cv2
 import numpy as np
 
@@ -23,7 +25,12 @@ def get_segmentation_contours(
         color = tuple(label_colors[label].tolist())
         label_mask = np.uint8(segmentation_mask == label)
 
-        contours, _ = cv2.findContours(label_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(cv2.Mat(label_mask), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         cv2.drawContours(image, contours, -1, color, thickness=2)
 
     return image
+
+__all__ = [
+    "get_segmentation_contours",
+    "graph_laplacian"
+]

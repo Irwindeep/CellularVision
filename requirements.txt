@@ -6,3 +6,4 @@ torch
 torchvision
 torchinfo
 opencv-python
+scipy
