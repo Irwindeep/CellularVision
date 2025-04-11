@@ -7,3 +7,4 @@ torchvision
 torchinfo
 opencv-python
 scipy
+scikit-learn
