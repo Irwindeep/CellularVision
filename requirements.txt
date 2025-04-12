@@ -9,3 +9,4 @@ opencv-python
 scipy
 scikit-learn
 segmentation-models-pytorch
+streamlit
