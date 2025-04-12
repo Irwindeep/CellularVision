@@ -86,8 +86,12 @@ def load_datasets() -> Tuple[MaskRCNNDataset, MaskRCNNDataset]:
 
     return train_dataset, val_dataset
 
-def load_model() -> MaskRCNN:
-    resnet18 = torchvision.models.resnet18(pretrained=True)
+def load_model(pretrained: bool = True) -> MaskRCNN:
+    weights = (
+        torchvision.models.ResNet18_Weights.IMAGENET1K_V1 if pretrained
+        else None
+    )
+    resnet18 = torchvision.models.resnet18(weights=weights)
     return_layers = {'layer1': '0', 'layer2': '1', 'layer3': '2', 'layer4': '3'}
     backbone = IntermediateLayerGetter(resnet18, return_layers=return_layers)
     in_channels_list = [64, 128, 256, 512]
@@ -155,7 +159,7 @@ def train_model(
     return train_losses, val_losses
 
 def main() -> None:
-    batch_size = 32
+    batch_size = 16
     model = load_model()
 
     epochs, lr = 20, 5e-3

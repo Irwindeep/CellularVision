@@ -26,7 +26,7 @@ class BackboneWithFPN(nn.Module):
         super().__init__()
         self.body = backbone
         self.fpn = fpn
-        self.out_channels = 256
+        self.out_channels = 128
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.body(x)
