@@ -20,3 +20,15 @@ class Conv2dBlock(nn.Module):
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         return self.blocks(input)
+
+class BackboneWithFPN(nn.Module):
+    def __init__(self, backbone: nn.Module, fpn: nn.Module):
+        super().__init__()
+        self.body = backbone
+        self.fpn = fpn
+        self.out_channels = 256
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.body(x)
+        x = self.fpn(x)
+        return x
