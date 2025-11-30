@@ -148,3 +148,10 @@ To train the segmentation models on the PanNuke dataset or your custom data, nav
 ```bash
 python training_scripts/train_unet.py
 ```
+
+## Contributors
+
+1. Ramninder Singh
+2. Irwindeep Singh
+3. Sarthak Malviya
+4. Vikrant Singh
